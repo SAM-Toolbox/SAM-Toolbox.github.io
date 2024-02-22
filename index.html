@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -31,22 +32,42 @@
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
           <a href="." class="icon icon-home"> SAM
-        </a><div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
-  </form>
-</div>
+        </a>
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#setup-conda-environment">Setup conda environment</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#project-layout">Project layout</a>
+    <li class="toctree-l3"><a class="reference internal" href="#install-package-in-new-environment">Install package in new environment</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-tests">Run tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#setup-jupyter-notebook-kernel">Setup Jupyter notebook kernel:</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#docker">Docker</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#running-several-systems-in-parallel">Running several systems in parallel</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#closing-several-conatiners-of-a-single-project">Closing several conatiners of a single project</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#coding">Coding</a>
     </li>
     </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="api/">API</a>
                 </li>
               </ul>
               <ul>
@@ -76,26 +97,73 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="seismo-acoustic-monitoring-test-bench">Seismo Acoustic Monitoring Test Bench</h1>
-<p>For full documentation visit <a href="https://www.mkdocs.org">mkdocs.org</a>.</p>
-<h2 id="commands">Commands</h2>
-<ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs -h</code> - Print help message and exit.</li>
-</ul>
-<h2 id="project-layout">Project layout</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
+                <h1 id="seismo-acoustic-monitoring-sam-toolbox">Seismo-Acoustic Monitoring (SAM) Toolbox</h1>
+<p>Detecting unusual patterns in seismo-acoustic data is a common task in geohazard monitoring. While the types of patterns can be very different between, for example, volcanic unrest and submarine landslides, the methodologies to detect these patterns are often very similar.
+A typical workflow can be broken down as follows:</p>
+<ol>
+<li>Access waveform and sensor meta data.</li>
+<li>Divide continuous data into fixed-size windows.</li>
+<li>Compute features for each window such as statistical properties or spectrograms.</li>
+<li>Detect patterns in the feature time-series. This can be either done in a supervised (e.g. patterns preceding an eruption) or unsupervised fashion (e.g. cluster analysis).</li>
+<li>Visualise features and patterns on an interactive dashboard that updates as new data becomes available.</li>
+</ol>
+<p>SAM implements this workflow using modern, open-source Data Science tools. Several common features (e.g., spectrograms) and pattern recognition algorithms (e.g., deep autoencoders) are already part of the toolbox. More importantly, the toolbox was designed with extensibility in mind. Our long-term objective is to make the SAM Toolbox a platform for evaluating new algorithms for seismo-acoustic monitoring.</p>
+<p><img src="docs/SAM_concept.png" width=400 ></p>
+<h2 id="installation">Installation</h2>
+<p>You can either use the toolbox as a python package or as a processing system using docker and a larger stack of orchestration and visualisation tools.</p>
+<h3 id="setup-conda-environment">Setup conda environment</h3>
+<pre><code>cd vumt
+conda env create -f environment.yml
 </code></pre>
+<h3 id="install-package-in-new-environment">Install package in new environment</h3>
+<pre><code>conda activate vumt
+cd vumt
+python setup.py develop
+</code></pre>
+<h2 id="run-tests">Run tests</h2>
+<p>To run only the quick tests:</p>
+<pre><code>cd vumt
+pytest
+</code></pre>
+<p>To run the whole test suite:</p>
+<pre><code>cd vumt
+pytest --runslow
+</code></pre>
+<h2 id="setup-jupyter-notebook-kernel">Setup Jupyter notebook kernel:</h2>
+<pre><code>conda activate vumt
+python -m ipykernel install --user --name vumt
+kernda -o -y /path/to/jupyter/kernels/vumt/kernel.json
+</code></pre>
+<p>To find the path of your kernel.json file you can run:</p>
+<pre><code>jupyter --paths
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Two configuration files are required to run the toolbox: an .ini file to configure data access, workflow, and algorithms and a .json file to configure the sensor network for which to process the data. By default <code>src/vumt/package_data/config.ini</code> and <code>src/vumt/package_data/metadata.json</code> are used. To load other configuration files define their path in the following environment variables:</p>
+<pre><code>SAMCONFIG=/path/to/config.ini
+SAMMETA=/path/to/metadata.json
+</code></pre>
+<h2 id="docker">Docker</h2>
+<p>To start a complete system with the processing system, an API to serve the data and a dashboard
+running in <a href="https://grafana.com/">Grafana</a> run the following command:</p>
+<pre><code>docker-compose up --build
+</code></pre>
+<p>This will create separate docker containers for each of the components mentioned above. The Grafana instance can be accessed by default at <code>http://localhost:3333</code> or <code>http://whatever.your.server.name.is:3333</code>.</p>
+<p>The workflow of computing features, training machine learning models and updating features and predictions is managed by <a href="https://dagster.io/">Dagster</a>. To access the dagster web UI go to <code>http://localhost:7777</code> or <code>http://whatever.your.server.name.is:7777</code>. Dagster's web UI shows you the workflow DAG, and the status of scheduled update runs. It also allows you to re-run failed updates.</p>
+<h3 id="running-several-systems-in-parallel">Running several systems in parallel</h3>
+<p>It's possible to run multiple of the previously mentioned systems in parallel. To do so create a copy of the <code>.env</code> file, modify the variables in it so they are different between the systems you are running. Then start the separate systems with:</p>
+<pre><code>docker-compose -p project1 --env-file copy-of-env-file up --build
+docker-compose -p project2 --env-file .env up --build
+</code></pre>
+<h3 id="closing-several-conatiners-of-a-single-project">Closing several conatiners of a single project</h3>
+<pre><code>docker-compose -p project1 down
+</code></pre>
+<h2 id="coding">Coding</h2>
+<p>For full documentation visit <a href="https://www.mkdocs.org">mkdocs.org</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="about/" class="btn btn-neutral float-right" title="About">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="api/" class="btn btn-neutral float-right" title="API">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -119,7 +187,7 @@ docs/
     
     
     
-      <span><a href="about/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="api/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
@@ -127,7 +195,6 @@ docs/
     <script>var base_url = ".";</script>
     <script src="js/theme_extra.js"></script>
     <script src="js/theme.js"></script>
-      <script src="search/main.js"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
@@ -139,5 +206,5 @@ docs/
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2024-02-22 01:53:44.152256+00:00
+Build Date UTC : 2024-02-22 04:18:24.120405+00:00
 -->
